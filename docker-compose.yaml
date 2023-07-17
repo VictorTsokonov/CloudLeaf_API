@@ -1,0 +1,17 @@
+version: 3.0.0
+services:
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: CloudLeaf
+#  cloudleaf:
+#    build: .
+#    ports:
+#      - 8080:8080
+#    depends_on:
+#      - postgres
