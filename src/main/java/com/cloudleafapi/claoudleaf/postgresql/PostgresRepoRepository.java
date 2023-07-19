@@ -90,5 +90,11 @@ public class PostgresRepoRepository implements RepoRepository {
         return repos.isEmpty() ? Optional.empty() : Optional.ofNullable(repos.get(0));
     }
 
+    @Override
+    public Optional<RepoEntity> getRepoByName(String repoName) {
+        String sql = "SELECT * FROM repos WHERE repo_name = ?";
+        List<RepoEntity> repos = jdbcTemplate.query(sql, new RepoRowMapper(), repoName);
+        return repos.isEmpty() ? Optional.empty() : Optional.ofNullable(repos.get(0));
+    }
 
 }

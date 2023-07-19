@@ -3,11 +3,9 @@ package com.cloudleafapi.claoudleaf.Controllers;
 import com.cloudleafapi.claoudleaf.Entities.DeploymentEntity;
 import com.cloudleafapi.claoudleaf.Services.DeploymentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,15 +19,41 @@ public class Deployment {
         this.deploymentService = deploymentService;
     }
 
-//    @PostMapping
-//    public DeploymentEntity createDeployment(/*your parameters here*/) {
-//        return deploymentService.createDeployment(/*your parameters here*/);
-//    }
+    @PostMapping
+    public DeploymentEntity createDeployment(@RequestBody DeploymentEntity deploymentEntity) {
+        return deploymentService.createDeployment(
+                deploymentEntity.userId().toString(),
+                deploymentEntity.repoId().toString(),
+                deploymentEntity.ec2InstanceId(),
+                deploymentEntity.ec2PublicIp()
+        );
+    }
 
     @GetMapping("/{id}")
     public DeploymentEntity getDeployment(@PathVariable UUID id) {
         return deploymentService.getDeployment(id).orElseThrow(() -> new IllegalArgumentException("Deployment not found"));
     }
 
-    // Additional methods for list, update and delete if needed
+    @GetMapping("/user/{userId}")
+    public List<DeploymentEntity> listDeploymentsByUserId(@PathVariable UUID userId) {
+        return deploymentService.listDeploymentsByUserId(userId);
+    }
+
+    @GetMapping("/repo/{repoId}")
+    public List<DeploymentEntity> listDeploymentsByRepoId(@PathVariable UUID repoId) {
+        return deploymentService.listDeploymentsByRepoId(repoId);
+    }
+
+    @PutMapping("/{id}")
+    public DeploymentEntity updateDeployment(@PathVariable UUID id, @RequestBody DeploymentEntity deploymentEntity) {
+        if (!id.equals(deploymentEntity.deploymentId())) {
+            throw new IllegalArgumentException("Deployment ID in the path variable and the request body do not match");
+        }
+        return deploymentService.updateDeployment(deploymentEntity);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteDeployment(@PathVariable UUID id) {
+        deploymentService.deleteDeployment(id);
+    }
 }

@@ -1,6 +1,5 @@
 package com.cloudleafapi.claoudleaf.Repositories;
 
-import com.cloudleafapi.claoudleaf.Entities.DeployStatus;
 import com.cloudleafapi.claoudleaf.Entities.DeploymentEntity;
 
 import java.util.List;
@@ -8,10 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface DeploymentRepository {
-    DeploymentEntity createDeployment(String userID, String repoID, String ec2InstanceId,
-                                      String asgName, String elbName, String securityGroupId,
-                                      String ec2PublicIp, String elbPublicIp,
-                                      DeployStatus status);
+    DeploymentEntity createDeployment(String userID, String repoID, String ec2InstanceId, String ec2PublicIp);
 
     Optional<DeploymentEntity> getDeployment(UUID deploymentId);
 
@@ -22,9 +18,6 @@ public interface DeploymentRepository {
     void deleteDeployment(UUID deploymentId);
 
     DeploymentEntity updateDeployment(DeploymentEntity deploymentEntity);
-
-    List<DeploymentEntity> listDeploymentsByStatus(DeployStatus status);
-
 }
 
 

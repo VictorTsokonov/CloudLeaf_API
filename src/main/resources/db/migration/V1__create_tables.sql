@@ -17,11 +17,6 @@ create table deployments (
     user_id uuid references users(user_id),
     repo_id uuid references repos(repo_id),
     ec2_instance_id varchar(255),
-    asg_name varchar(255),
-    elb_name varchar(255),
-    security_group_id varchar(255) not null,
-    ec2_public_ip varchar(255),
-    elb_public_ip varchar(255),
-    status varchar(50) not null check (status in ('Deployed', 'Deploying...', 'Not Deployed'))
+    ec2_public_ip varchar(255)
 );
 

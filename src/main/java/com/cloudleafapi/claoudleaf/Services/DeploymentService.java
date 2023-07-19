@@ -1,6 +1,5 @@
 package com.cloudleafapi.claoudleaf.Services;
 
-import com.cloudleafapi.claoudleaf.Entities.DeployStatus;
 import com.cloudleafapi.claoudleaf.Entities.DeploymentEntity;
 import com.cloudleafapi.claoudleaf.Repositories.DeploymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +19,8 @@ public class DeploymentService {
         this.deploymentRepository = deploymentRepository;
     }
 
-    public DeploymentEntity createDeployment(String userID, String repoID, String ec2InstanceId, String asgName, String elbName, String securityGroupId, String ec2PublicIp, String elbPublicIp, DeployStatus status) {
-        return deploymentRepository.createDeployment(userID, repoID, ec2InstanceId, asgName, elbName, securityGroupId, ec2PublicIp, elbPublicIp, status);
+    public DeploymentEntity createDeployment(String userID, String repoID, String ec2InstanceId, String ec2PublicIp) {
+        return deploymentRepository.createDeployment(userID, repoID, ec2InstanceId, ec2PublicIp);
     }
 
     public Optional<DeploymentEntity> getDeployment(UUID deploymentId) {
@@ -44,7 +43,4 @@ public class DeploymentService {
         return deploymentRepository.updateDeployment(deploymentEntity);
     }
 
-    public List<DeploymentEntity> listDeploymentsByStatus(DeployStatus status) {
-        return deploymentRepository.listDeploymentsByStatus(status);
-    }
 }

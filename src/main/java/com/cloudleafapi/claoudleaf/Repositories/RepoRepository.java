@@ -19,6 +19,8 @@ public interface RepoRepository {
 
     Optional<RepoEntity> findRepoByUserIdAndRepoName(String userId, String repoName);
 
+    Optional<RepoEntity> getRepoByName(String repoName);
+
 //    Optional<RepoEntity> findRepoByRepoNameAndUserId(String repoName, UUID userId);
 }
 

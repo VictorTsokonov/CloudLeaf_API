@@ -57,5 +57,10 @@ public class RepoService {
     public RepoEntity updateRepo(RepoEntity repoEntity) {
         return repoRepository.updateRepo(repoEntity);
     }
+
+    public Optional<RepoEntity> getRepoByName(String repoName) {
+        return repoRepository.getRepoByName(repoName);
+    }
+
 }
 

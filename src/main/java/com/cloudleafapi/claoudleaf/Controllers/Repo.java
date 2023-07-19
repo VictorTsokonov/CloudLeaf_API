@@ -32,5 +32,12 @@ public class Repo {
         return repoService.getRepo(id).orElseThrow(() -> new IllegalArgumentException("Repository not found"));
     }
 
+    @GetMapping("/name")
+    public RepoEntity getRepoByName(@RequestHeader("repoName") String name) {
+        return repoService.getRepoByName(name)
+                .orElseThrow(() -> new IllegalArgumentException("Repository not found"));
+    }
+
+
     // Additional methods for list, update and delete if needed
 }
