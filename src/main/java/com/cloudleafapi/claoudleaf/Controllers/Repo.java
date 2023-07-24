@@ -5,6 +5,7 @@ import com.cloudleafapi.claoudleaf.Services.RepoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,6 +37,11 @@ public class Repo {
     public RepoEntity getRepoByName(@RequestHeader("repoName") String name) {
         return repoService.getRepoByName(name)
                 .orElseThrow(() -> new IllegalArgumentException("Repository not found"));
+    }
+
+    @GetMapping("/user/{username}")
+    public List<RepoEntity> listReposByUserName(@PathVariable String username) {
+        return repoService.listReposByUserName(username);
     }
 
 

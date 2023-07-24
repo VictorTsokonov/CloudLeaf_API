@@ -97,4 +97,11 @@ public class PostgresRepoRepository implements RepoRepository {
         return repos.isEmpty() ? Optional.empty() : Optional.ofNullable(repos.get(0));
     }
 
+    @Override
+    public List<RepoEntity> listReposByUserName(String userName) {
+        String sql = "SELECT * FROM repos JOIN users ON repos.user_id = users.user_id WHERE users.github_username = ?";
+        return jdbcTemplate.query(sql, new RepoRowMapper(), userName);
+    }
+
+
 }

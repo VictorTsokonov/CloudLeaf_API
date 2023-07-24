@@ -62,5 +62,10 @@ public class RepoService {
         return repoRepository.getRepoByName(repoName);
     }
 
+    public List<RepoEntity> listReposByUserName(String userName) {
+        return repoRepository.listReposByUserName(userName);
+    }
+
+
 }
 

@@ -3,21 +3,28 @@ package com.cloudleafapi.claoudleaf.Controllers;
 import com.cloudleafapi.claoudleaf.Entities.DeploymentEntity;
 import com.cloudleafapi.claoudleaf.Entities.RepoEntity;
 import com.cloudleafapi.claoudleaf.Services.AWSDeployService;
-import org.springframework.http.*;
+import com.cloudleafapi.claoudleaf.Services.DeploymentService;
+import com.cloudleafapi.claoudleaf.Services.RepoService;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/deploy")
 public class AWSDeploy {
     private final AWSDeployService ec2Service;
+    private final RepoService repoService;
+
+    private final DeploymentService deploymentService;
 
 
-    public AWSDeploy(AWSDeployService ec2Service) {
+    public AWSDeploy(AWSDeployService ec2Service, RepoService repoService, DeploymentService deploymentService) {
         this.ec2Service = ec2Service;
+        this.repoService = repoService;
+        this.deploymentService = deploymentService;
     }
 
     @PostMapping
@@ -25,60 +32,51 @@ public class AWSDeploy {
 
         String name = full_name.split("/")[1];
 
-        // Deploy the repository to EC2 instance
-        List<String> ec2Details = ec2Service.deployRepo(name, clone_url, ssh_url); // 0 -> IP, 1 -> ID
+        // Use RepoService to get the repo details
+        Optional<RepoEntity> repoEntityOpt = repoService.getRepoByName(full_name);
 
-        // Send GET request to /api/repos/name endpoint to get the repo details
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders deployHeaders = new HttpHeaders();
-        deployHeaders.set("repoName", full_name);
-        HttpEntity<String> entity = new HttpEntity<>("parameters", deployHeaders);
-
-        ResponseEntity<RepoEntity> repoEntityResponse = restTemplate.exchange(
-                "http://localhost:8080/api/repos/name",
-                HttpMethod.GET,
-                entity,
-                RepoEntity.class
-        );
-
-        // Check if the repo exists
-        if (!repoEntityResponse.getStatusCode().is2xxSuccessful()) {
+        if (repoEntityOpt.isEmpty()) {
             throw new IllegalArgumentException("No repository found with name: " + full_name);
         }
 
-        RepoEntity repoEntity = repoEntityResponse.getBody();
-
-//        assert repoEntity != null;
+        RepoEntity repoEntity = repoEntityOpt.get();
         UUID repoId = repoEntity.repoId();
-        UUID userId = repoEntity.userId();
 
-        // Create a new DeploymentEntity and save it to the database
-        DeploymentEntity newDeployment = new DeploymentEntity(
-                UUID.randomUUID(),
-                userId,
-                repoId,
-                ec2Details.get(1), // EC2 instance ID
-                ec2Details.get(0)  // EC2 public IP
-        );
+        // Check if there are any deployments for this repo
+        List<DeploymentEntity> existingDeployments = deploymentService.listDeploymentsByRepoId(repoId);
 
-        // Send POST request to /api/deployments endpoint
-        HttpHeaders deploymentHeaders = new HttpHeaders();
-        deploymentHeaders.setContentType(MediaType.APPLICATION_JSON);
+        if (existingDeployments.size() == 0) {
+            // If there are no existing deployments, deploy the repository to EC2 instance
+            List<String> ec2Details = ec2Service.deployRepo(name, clone_url, ssh_url); // 0 -> IP, 1 -> ID
 
-        HttpEntity<DeploymentEntity> request = new HttpEntity<>(newDeployment, deploymentHeaders);
+            UUID userId = repoEntity.userId();
 
-        ResponseEntity<DeploymentEntity> responseEntity = restTemplate.exchange(
-                "http://localhost:8080/api/deployments",
-                HttpMethod.POST,
-                request,
-                DeploymentEntity.class
-        );
+            // Create a new DeploymentEntity and save it to the database
+            DeploymentEntity newDeployment = new DeploymentEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    repoId,
+                    ec2Details.get(1), // EC2 instance ID
+                    ec2Details.get(0)  // EC2 public IP
+            );
 
-        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to create deployment");
+            // Use DeploymentService to create the deployment
+            DeploymentEntity createdDeployment = deploymentService.createDeployment(
+                    newDeployment.userId().toString(),
+                    newDeployment.repoId().toString(),
+                    newDeployment.ec2InstanceId(),
+                    newDeployment.ec2PublicIp()
+            );
+
+            if (createdDeployment == null) {
+                throw new RuntimeException("Failed to create deployment in database");
+            }
+
+            return ec2Details;
         }
 
-        return ec2Details;
+        // If there are existing deployments, do nothing and return an empty list.
+        return new ArrayList<>();
     }
 
 

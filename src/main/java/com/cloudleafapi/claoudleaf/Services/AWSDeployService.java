@@ -36,11 +36,17 @@ public class AWSDeployService {
         String userData =
                 "#!/bin/bash\n" +
                         "sudo apt-get update -y\n" +
+
                         "wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -\n" +
                         "sudo add-apt-repository 'deb https://apt.corretto.aws stable main' -y\n" +
                         "sudo apt-get update; sudo apt-get install -y java-17-amazon-corretto-jdk\n" +
+
+                        "curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -\n" +
+                        "sudo apt-get install -y nodejs\n" +
+
                         "sudo apt-get install -y git\n" +
                         "git clone " + clone_url + "\n" +
+
                         "cd " + name + "\n" +
                         "chmod 777 run_script.sh\n" +
                         "./run_script.sh\n";

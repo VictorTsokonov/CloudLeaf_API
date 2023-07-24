@@ -10,6 +10,7 @@ create table repos (
     repo_name varchar(255) not null,
     clone_url varchar(255) not null,
     ssh_url varchar(255) not null
+
 );
 
 create table deployments (
