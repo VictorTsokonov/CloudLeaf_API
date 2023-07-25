@@ -27,6 +27,14 @@ public class DeploymentService {
         return deploymentRepository.getDeployment(deploymentId);
     }
 
+    public Optional<DeploymentEntity> getDeploymentByInstanceId(String instanceId) {
+        return deploymentRepository.getDeploymentByInstanceId(instanceId);
+    }
+
+    public Optional<DeploymentEntity> getDeploymentByInstanceIp(String instanceIp) {
+        return deploymentRepository.getDeploymentByInstanceIp(instanceIp);
+    }
+
     public List<DeploymentEntity> listDeploymentsByUserId(UUID userId) {
         return deploymentRepository.listDeploymentsByUserId(userId);
     }
@@ -42,5 +50,6 @@ public class DeploymentService {
     public DeploymentEntity updateDeployment(DeploymentEntity deploymentEntity) {
         return deploymentRepository.updateDeployment(deploymentEntity);
     }
+
 
 }

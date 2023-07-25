@@ -86,4 +86,12 @@ public class PostgresUserRepository implements UserRepository {
         jdbcTemplate.update(sql, userEntity.github_username(), userEntity.github_access_token(), userEntity.user_id());
         return getUser(userEntity.user_id()).orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    @Override
+    public Optional<UserEntity> findUserByGithubAccessToken(String accessToken) {
+        String sql = "SELECT * FROM users WHERE github_access_token = ?";
+        List<UserEntity> users = jdbcTemplate.query(sql, new UserRowMapper(), accessToken);
+        return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
+    }
+
 }

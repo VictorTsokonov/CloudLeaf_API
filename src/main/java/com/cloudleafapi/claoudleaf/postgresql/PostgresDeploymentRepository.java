@@ -4,6 +4,7 @@ import com.cloudleafapi.claoudleaf.Entities.DeploymentEntity;
 import com.cloudleafapi.claoudleaf.Repositories.DeploymentRepository;
 import com.cloudleafapi.claoudleaf.RowMappers.DeploymentRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -40,6 +41,28 @@ public class PostgresDeploymentRepository implements DeploymentRepository {
     public Optional<DeploymentEntity> getDeployment(UUID deploymentId) {
         String sql = "SELECT * FROM deployments WHERE deployment_id = ?";
         return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new DeploymentRowMapper(), deploymentId));
+    }
+
+    @Override
+    public Optional<DeploymentEntity> getDeploymentByInstanceId(String instanceId) {
+        String sql = "SELECT * FROM deployments WHERE ec2_instance_id = ?";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new DeploymentRowMapper(), instanceId));
+        } catch (EmptyResultDataAccessException ex) {
+            System.out.println("ERROR HERE LINE 52 POSTGRES DEPLOYMENTS");
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<DeploymentEntity> getDeploymentByInstanceIp(String instanceIp) {
+        String sql = "SELECT * FROM deployments WHERE ec2_public_ip = ?";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new DeploymentRowMapper(), instanceIp));
+        } catch (EmptyResultDataAccessException ex) {
+            System.out.println("ERROR HERE LINE 63 POSTGRES DEPLOYMENTS");
+            return Optional.empty();
+        }
     }
 
     @Override

@@ -41,8 +41,8 @@ public class AWSDeployService {
                         "sudo add-apt-repository 'deb https://apt.corretto.aws stable main' -y\n" +
                         "sudo apt-get update; sudo apt-get install -y java-17-amazon-corretto-jdk\n" +
 
-                        "curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -\n" +
-                        "sudo apt-get install -y nodejs\n" +
+//                        "curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -\n" +
+//                        "sudo apt-get install -y nodejs\n" +
 
                         "sudo apt-get install -y git\n" +
                         "git clone " + clone_url + "\n" +
@@ -110,7 +110,7 @@ public class AWSDeployService {
 
             try {
                 // sleep for 10 seconds before the next request
-                Thread.sleep(10 * 1000L);
+                Thread.sleep(1000L);
             } catch (InterruptedException e) {
                 // handle the exception
             }
@@ -120,5 +120,30 @@ public class AWSDeployService {
         return List.of(instance.publicIpAddress() + ":8080", instanceId);
 
     }
+
+    public void terminateInstance(String instanceId) {
+        // Create a request to terminate the instance
+        TerminateInstancesRequest terminateRequest = TerminateInstancesRequest.builder()
+                .instanceIds(instanceId)
+                .build();
+
+        try {
+            // Attempt to terminate the instance
+            TerminateInstancesResponse terminateResponse = ec2.terminateInstances(terminateRequest);
+
+            // Check the response to make sure the instance was successfully terminated
+            InstanceStateChange stateChange = terminateResponse.terminatingInstances().get(0);
+            if (!stateChange.currentState().name().equals(InstanceStateName.TERMINATED)
+                    && !stateChange.currentState().name().equals(InstanceStateName.SHUTTING_DOWN)) {
+                throw new RuntimeException("Failed to terminate instance " + instanceId);
+            }
+        } catch (Ec2Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            throw new RuntimeException("Error terminating instance " + instanceId, e);
+        }
+
+        System.out.println("Successfully requested termination of instance " + instanceId);
+    }
+
 
 }

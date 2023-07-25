@@ -15,7 +15,10 @@ public class RepoRowMapper implements RowMapper<RepoEntity> {
                 UUID.fromString(rs.getString("user_id")),
                 rs.getString("repo_name"),
                 rs.getString("clone_url"),
-                rs.getString("ssh_url")
+                rs.getString("ssh_url"),
+                rs.getString("ec2_instance_id"),
+                rs.getString("ec2_public_ip"),
+                rs.getString("status")
         );
     }
 }

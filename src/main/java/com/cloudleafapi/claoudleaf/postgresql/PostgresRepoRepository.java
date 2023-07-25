@@ -30,12 +30,12 @@ public class PostgresRepoRepository implements RepoRepository {
     }
 
     @Override
-    public RepoEntity createRepo(String userID, String repoName, String cloneUrl, String sshUrl) {
-        return txTemplate.execute(status -> {
+    public RepoEntity createRepo(String userID, String repoName, String cloneUrl, String sshUrl, String status) {
+        return txTemplate.execute(transactionStatus -> {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(
-                        "INSERT INTO repos(repo_id, user_id, repo_name, clone_url, ssh_url) VALUES(?, ?, ?, ?, ?)",
+                        "INSERT INTO repos(repo_id, user_id, repo_name, clone_url, ssh_url, ec2_instance_id, ec2_public_ip, status) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
                 UUID repoId = UUID.randomUUID();
                 ps.setObject(1, repoId);
@@ -43,11 +43,30 @@ public class PostgresRepoRepository implements RepoRepository {
                 ps.setString(3, repoName);
                 ps.setString(4, cloneUrl);
                 ps.setString(5, sshUrl);
+                ps.setString(6, null); // ec2_instance_id
+                ps.setString(7, null); // ec2_public_ip
+                ps.setString(8, status == null || status.isEmpty() ? "Not Deployed" : status); // Set default status if not specified
                 return ps;
             }, keyHolder);
             UUID repoId = (UUID) Objects.requireNonNull(keyHolder.getKeys()).get("repo_id");
             return getRepo(repoId).orElseThrow(() -> new RuntimeException("Repo not found"));
         });
+    }
+
+
+    @Override
+    public RepoEntity updateRepo(RepoEntity repoEntity) {
+        String sql = "UPDATE repos SET user_id = ?, repo_name = ?, clone_url = ?, ssh_url = ?, ec2_instance_id = ?, ec2_public_ip = ?, status = ? WHERE repo_id = ?";
+        jdbcTemplate.update(sql,
+                UUID.fromString(String.valueOf(repoEntity.userId())),
+                repoEntity.repoName(),
+                repoEntity.cloneUrl(),
+                repoEntity.sshUrl(),
+                repoEntity.ec2InstanceId(),
+                repoEntity.ec2PublicIp(),
+                repoEntity.status(),
+                UUID.fromString(String.valueOf(repoEntity.repoId())));
+        return getRepo(UUID.fromString(String.valueOf(repoEntity.repoId()))).orElseThrow(() -> new RuntimeException("Repo not found"));
     }
 
 
@@ -67,18 +86,6 @@ public class PostgresRepoRepository implements RepoRepository {
     public void deleteRepo(UUID repoId) {
         String sql = "DELETE FROM repos WHERE repo_id = ?";
         jdbcTemplate.update(sql, repoId);
-    }
-
-    @Override
-    public RepoEntity updateRepo(RepoEntity repoEntity) {
-        String sql = "UPDATE repos SET user_id = ?, repo_name = ?, clone_url = ?, ssh_url = ? WHERE repo_id = ?";
-        jdbcTemplate.update(sql,
-                UUID.fromString(String.valueOf(repoEntity.userId())),
-                repoEntity.repoName(),
-                repoEntity.cloneUrl(),
-                repoEntity.sshUrl(),
-                UUID.fromString(String.valueOf(repoEntity.repoId())));
-        return getRepo(UUID.fromString(String.valueOf(repoEntity.repoId()))).orElseThrow(() -> new RuntimeException("Repo not found"));
     }
 
     public Optional<RepoEntity> findRepoByUserIdAndRepoName(String userId, String repoName) {
@@ -103,5 +110,16 @@ public class PostgresRepoRepository implements RepoRepository {
         return jdbcTemplate.query(sql, new RepoRowMapper(), userName);
     }
 
+    @Override
+    public void updateRepoStatusByRepoName(String repoName, String status) {
+        String sql = "UPDATE repos SET status = ? WHERE repo_name = ?";
+        jdbcTemplate.update(sql, status, repoName);
+    }
+
+    @Override
+    public void updateRepoIpAddressByRepoName(String repoName, String ipAddress) {
+        String sql = "UPDATE repos SET ec2_public_ip = ? WHERE repo_name = ?";
+        jdbcTemplate.update(sql, ipAddress, repoName);
+    }
 
 }

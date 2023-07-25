@@ -7,7 +7,11 @@ public record RepoEntity(
         UUID userId,
         String repoName,
         String cloneUrl,
-        String sshUrl
+        String sshUrl,
+        String ec2InstanceId,
+        String ec2PublicIp,
+        String status
 ) {
-    
+
 }
+

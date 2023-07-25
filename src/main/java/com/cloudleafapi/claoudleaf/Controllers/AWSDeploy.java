@@ -79,20 +79,39 @@ public class AWSDeploy {
         return new ArrayList<>();
     }
 
+    @DeleteMapping("/{instanceIp}")
+    public void terminateInstance(@PathVariable String instanceIp) {
+        Optional<DeploymentEntity> deploymentEntity = deploymentService.getDeploymentByInstanceIp(instanceIp.trim());
+        if (deploymentEntity.isEmpty()) {
+            throw new RuntimeException("Deployment doesn't exist INSTANCE_IP: " + instanceIp);
+        }
 
-    @GetMapping("/test")
-    public List<String> deployTest() {
-        return ec2Service.deployRepo(
-                "TestHostRepo",
-                "https://github.com/VictorTsokonov/TestHostRepo.git",
-                "git@github.com:VictorTsokonov/TestHostRepo.git"); // 0 -> IP, 1 -> ID
-//        return ec2Service.toString();
+        Optional<RepoEntity> repoEntity = repoService.getRepo(deploymentEntity.get().repoId());
+        if (repoEntity.isEmpty()) {
+            throw new RuntimeException("Repository doesn't exist or something else...");
+        }
+        repoService.updateRepoStatusByRepoName(repoEntity.get().repoName(), "Terminated");
+        repoService.updateRepoIpAddressByRepoName(repoEntity.get().repoName(), "");
+
+        deploymentService.deleteDeployment(deploymentEntity.get().deploymentId());
+
+        ec2Service.terminateInstance(deploymentEntity.get().ec2InstanceId());
     }
 
-    @GetMapping("what")
-    public String o() {
-        return "Nice what";
-    }
+
+//    @GetMapping("/test")
+//    public List<String> deployTest() {
+//        return ec2Service.deployRepo(
+//                "TestHostRepo",
+//                "https://github.com/VictorTsokonov/TestHostRepo.git",
+//                "git@github.com:VictorTsokonov/TestHostRepo.git"); // 0 -> IP, 1 -> ID
+////        return ec2Service.toString();
+//    }
+//
+//    @GetMapping("what")
+//    public String o() {
+//        return "Nice what";
+//    }
 
 
 }

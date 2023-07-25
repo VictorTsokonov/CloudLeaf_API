@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface RepoRepository {
-    RepoEntity createRepo(String userID, String repoName, String cloneUrl, String sshUrl);
+    RepoEntity createRepo(String userID, String repoName, String cloneUrl, String sshUrl, String status);
 
     Optional<RepoEntity> getRepo(UUID repoID);
 
@@ -23,8 +23,9 @@ public interface RepoRepository {
 
     List<RepoEntity> listReposByUserName(String userName);
 
+    void updateRepoStatusByRepoName(String repoName, String status);
 
-//    Optional<RepoEntity> findRepoByRepoNameAndUserId(String repoName, UUID userId);
+    void updateRepoIpAddressByRepoName(String repoName, String ipAddress);
 }
 
 

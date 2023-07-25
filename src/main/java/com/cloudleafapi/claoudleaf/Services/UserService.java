@@ -53,4 +53,9 @@ public class UserService {
     public UserEntity updateUser(UserEntity userEntity) {
         return userRepository.updateUser(userEntity);
     }
+
+    public Optional<UserEntity> findUserByGithubAccessToken(String accessToken) {
+        return userRepository.findUserByGithubAccessToken(accessToken);
+    }
+
 }

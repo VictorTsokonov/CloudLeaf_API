@@ -19,4 +19,7 @@ public interface UserRepository {
 
     UserEntity updateUser(UserEntity userEntity);
 
+    Optional<UserEntity> findUserByGithubAccessToken(String accessToken);
+
+
 }

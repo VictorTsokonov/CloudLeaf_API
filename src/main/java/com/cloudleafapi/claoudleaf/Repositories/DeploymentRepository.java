@@ -11,6 +11,10 @@ public interface DeploymentRepository {
 
     Optional<DeploymentEntity> getDeployment(UUID deploymentId);
 
+    Optional<DeploymentEntity> getDeploymentByInstanceId(String instanceId);
+
+    Optional<DeploymentEntity> getDeploymentByInstanceIp(String instanceIp);
+
     List<DeploymentEntity> listDeploymentsByUserId(UUID userId);
 
     List<DeploymentEntity> listDeploymentsByRepoId(UUID repoId);

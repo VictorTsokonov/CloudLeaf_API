@@ -47,6 +47,11 @@ public class User {
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
+    @GetMapping("/token/{accessToken}")
+    public UserEntity getUserByAccessToken(@PathVariable String accessToken) {
+        return userService.findUserByGithubAccessToken(accessToken).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
 
     // Additional methods for update and delete if needed
 }
