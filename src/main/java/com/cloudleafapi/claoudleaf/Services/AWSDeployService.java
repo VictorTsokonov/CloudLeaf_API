@@ -33,7 +33,11 @@ public class AWSDeployService {
     }
 
     public List<String> deployRepo(String name, String clone_url, String ssh_url) {
-        String userData =
+        // we will need to take:
+        // the port
+        // the language or framework
+        // then we create a dependencies HashMap full of bash scripts for installation
+        String userData = // This here will need work
                 "#!/bin/bash\n" +
                         "sudo apt-get update -y\n" +
 
@@ -117,7 +121,7 @@ public class AWSDeployService {
         }
 
         // Return the instance's public IP + port 8080 in our case
-        return List.of(instance.publicIpAddress() + ":8080", instanceId);
+        return List.of(instance.publicIpAddress() + ":8080", instanceId); // DYNAMIC PORT TO CHANGE
 
     }
 
