@@ -32,10 +32,10 @@ public class AWSDeployService {
                 .build();
     }
 
-    public List<String> deployRepo(String name, String clone_url, String ssh_url) {
+    public List<String> deployRepo(String name, String clone_url, String ssh_url, String port, List<String> dependencies) {
         // we will need to take:
-        // the port
-        // the language or framework
+        // the port - YES
+        // the language or framework - YES
         // then we create a dependencies HashMap full of bash scripts for installation
         String userData = // This here will need work
                 "#!/bin/bash\n" +
@@ -121,7 +121,7 @@ public class AWSDeployService {
         }
 
         // Return the instance's public IP + port 8080 in our case
-        return List.of(instance.publicIpAddress() + ":8080", instanceId); // DYNAMIC PORT TO CHANGE
+        return List.of(instance.publicIpAddress() + ":" + port, instanceId); // DYNAMIC PORT TO CHANGE
 
     }
 

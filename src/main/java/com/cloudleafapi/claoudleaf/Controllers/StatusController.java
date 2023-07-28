@@ -70,7 +70,7 @@ public class StatusController {
                         );
                         repoService.updateRepo(updatedRepo);
                     }
-
+                    System.out.println("FETCHING FOR STATUS SHOULD BE STOPPED NOW");
                     scheduledFuture[0].cancel(false); // Stop the task once the status code is 200
                 }
             } catch (Exception ignored) {

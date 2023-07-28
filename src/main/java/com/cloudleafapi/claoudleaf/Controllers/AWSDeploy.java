@@ -32,8 +32,19 @@ public class AWSDeploy {
         this.deploymentService = deploymentService;
     }
 
+//    Please be aware that there might be a size limit for the HTTP headers size,
+//    which is usually around 8KB for most servers, but it depends on the specific server configuration.
+//    So if your dependenciesList is large, it might not fit into the headers.
+//    Remember to update your backend logic to parse the dependencies header back into a list:
+//    List<String> dependenciesList = new Gson().fromJson(dependenciesHeader, List.class);
+
     @PostMapping
-    public List<String> deployRepo(@RequestParam String full_name, @RequestParam String clone_url, @RequestParam String ssh_url) {
+    public List<String> deployRepo(@RequestHeader String full_name,
+                                   @RequestHeader String clone_url,
+                                   @RequestHeader String ssh_url,
+                                   @RequestHeader String port,
+                                   @RequestHeader List<String> dependencies
+    ) {
         String name = full_name.split("/")[1];
 
         // Use RepoService to get the repo details
@@ -52,7 +63,7 @@ public class AWSDeploy {
         List<String> ec2Details = new ArrayList<>();
         if (existingDeployments.size() == 0) {
             // If there are no existing deployments, deploy the repository to EC2 instance
-            ec2Details = ec2Service.deployRepo(name, clone_url, ssh_url);
+            ec2Details = ec2Service.deployRepo(name, clone_url, ssh_url, port, dependencies);
 
             UUID userId = repoEntity.userId();
 
