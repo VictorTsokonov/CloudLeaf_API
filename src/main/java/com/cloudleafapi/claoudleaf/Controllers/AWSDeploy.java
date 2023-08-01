@@ -25,6 +25,15 @@ public class AWSDeploy {
 
     private final DeploymentService deploymentService;
 
+    public static class DeployRequest {
+        public String full_name; // Note the field name
+        public String clone_url;
+        public String ssh_url;
+        public String port;
+        public List<String> dependencies;
+
+    }
+
 
     public AWSDeploy(AWSDeployService ec2Service, RepoService repoService, DeploymentService deploymentService) {
         this.ec2Service = ec2Service;
@@ -39,13 +48,13 @@ public class AWSDeploy {
 //    List<String> dependenciesList = new Gson().fromJson(dependenciesHeader, List.class);
 
     @PostMapping
-    public List<String> deployRepo(@RequestHeader String full_name,
-                                   @RequestHeader String clone_url,
-                                   @RequestHeader String ssh_url,
-                                   @RequestHeader String port,
-                                   @RequestHeader List<String> dependencies
-    ) {
+    public List<String> deployRepo(@RequestBody DeployRequest deployRequest) {
+        String full_name = deployRequest.full_name;
         String name = full_name.split("/")[1];
+        String clone_url = deployRequest.clone_url;
+        String ssh_url = deployRequest.ssh_url;
+        String port = deployRequest.port;
+        List<String> dependencies = deployRequest.dependencies;
 
         // Use RepoService to get the repo details
         Optional<RepoEntity> repoEntityOpt = repoService.getRepoByName(full_name);
@@ -61,7 +70,7 @@ public class AWSDeploy {
         List<DeploymentEntity> existingDeployments = deploymentService.listDeploymentsByRepoId(repoId);
 
         List<String> ec2Details = new ArrayList<>();
-        if (existingDeployments.size() == 0) {
+        if (existingDeployments.isEmpty()) { // existingDeployments.size() == 0
             // If there are no existing deployments, deploy the repository to EC2 instance
             ec2Details = ec2Service.deployRepo(name, clone_url, ssh_url, port, dependencies);
 

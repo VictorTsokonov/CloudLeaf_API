@@ -10,8 +10,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AWSDeployService {
@@ -33,27 +32,49 @@ public class AWSDeployService {
     }
 
     public List<String> deployRepo(String name, String clone_url, String ssh_url, String port, List<String> dependencies) {
-        // we will need to take:
-        // the port - YES
-        // the language or framework - YES
+        System.out.println(dependencies);
         // then we create a dependencies HashMap full of bash scripts for installation
-        String userData = // This here will need work
-                "#!/bin/bash\n" +
-                        "sudo apt-get update -y\n" +
+        Map<String, List<String>> dependencyMap = new HashMap<>();
+        dependencyMap.put("npm", Arrays.asList(
+                "curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -",
+                "sudo apt-get install -y nodejs"
+        ));
+        dependencyMap.put("java", Arrays.asList(
+                "wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -",
+                "sudo add-apt-repository 'deb https://apt.corretto.aws stable main' -y",
+                "sudo apt-get update; sudo apt-get install -y java-17-amazon-corretto-jdk"
+        ));
+        // Add more dependencies as needed
 
-                        "wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -\n" +
-                        "sudo add-apt-repository 'deb https://apt.corretto.aws stable main' -y\n" +
-                        "sudo apt-get update; sudo apt-get install -y java-17-amazon-corretto-jdk\n" +
+        // Start constructing the user data script
+        StringBuilder userDataBuilder = new StringBuilder();
+        userDataBuilder.append("#!/bin/bash\n");
+        userDataBuilder.append("sudo apt-get update -y\n");
 
-//                        "curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -\n" +
-//                        "sudo apt-get install -y nodejs\n" +
+//        userDataBuilder.append("wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -\n");
+//        userDataBuilder.append("sudo add-apt-repository 'deb https://apt.corretto.aws stable main' -y\n");
+//        userDataBuilder.append("sudo apt-get update; sudo apt-get install -y java-17-amazon-corretto-jdk\n");
 
-                        "sudo apt-get install -y git\n" +
-                        "git clone " + clone_url + "\n" +
+        // Iterate over the provided dependencies and append corresponding installation commands
+        System.out.println("Running");
+        for (String dep : dependencies) {
+            if (dependencyMap.containsKey(dep.toLowerCase())) {
+                System.out.println(dep.toLowerCase());
+                for (String command : dependencyMap.get(dep)) {
+                    userDataBuilder.append(command).append("\n");
+                    System.out.println(command + "\n");
+                }
+            }
+        }
 
-                        "cd " + name + "\n" +
-                        "chmod 777 run_script.sh\n" +
-                        "./run_script.sh\n";
+        userDataBuilder.append("sudo apt-get install -y git\n");
+        userDataBuilder.append("git clone ").append(clone_url).append("\n");
+
+        userDataBuilder.append("cd ").append(name).append("\n");
+        userDataBuilder.append("chmod 777 run_script.sh\n");
+        userDataBuilder.append("./run_script.sh\n");
+
+        String userData = userDataBuilder.toString();
 
 //        Ubuntu Server 22.04 LTS (HVM), SSD Volume Type
 //        ami-04e601abe3e1a910f (64-bit (x86)) / ami-0329d3839379bfd15 (64-bit (Arm))
