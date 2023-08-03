@@ -4,10 +4,7 @@ import com.cloudleafapi.claoudleaf.Services.AWSDatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -46,4 +43,22 @@ public class AWSDatabase {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Failed to create database. Please try again."));
         }
     }
+
+    @DeleteMapping("/deleteDatabase")
+    public ResponseEntity<Map<String, String>> deleteDatabase(@RequestParam String githubName, @RequestParam String databaseName) {
+        try {
+            // Validating the input
+            if (githubName == null || databaseName == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Github name and database name are required."));
+            }
+
+            // Deleting the database and associated parameters using the service
+            String responseMessage = awsDatabaseService.deleteDatabase(githubName, databaseName);
+
+            return ResponseEntity.ok(Map.of("message", responseMessage));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Failed to delete database. Please try again."));
+        }
+    }
+
 }

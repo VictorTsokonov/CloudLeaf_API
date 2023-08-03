@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ public class PostgresDeploymentRepository implements DeploymentRepository {
     }
 
     @Override
+    @Transactional()
     public DeploymentEntity createDeployment(String userID,
                                              String repoID,
                                              String ec2InstanceId,
@@ -38,12 +40,14 @@ public class PostgresDeploymentRepository implements DeploymentRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<DeploymentEntity> getDeployment(UUID deploymentId) {
         String sql = "SELECT * FROM deployments WHERE deployment_id = ?";
         return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new DeploymentRowMapper(), deploymentId));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<DeploymentEntity> getDeploymentByInstanceId(String instanceId) {
         String sql = "SELECT * FROM deployments WHERE ec2_instance_id = ?";
         try {
@@ -55,6 +59,7 @@ public class PostgresDeploymentRepository implements DeploymentRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<DeploymentEntity> getDeploymentByInstanceIp(String instanceIp) {
         String sql = "SELECT * FROM deployments WHERE ec2_public_ip = ?";
         try {
@@ -66,12 +71,14 @@ public class PostgresDeploymentRepository implements DeploymentRepository {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DeploymentEntity> listDeploymentsByUserId(UUID userId) {
         String sql = "SELECT * FROM deployments WHERE user_id = ?";
         return jdbcTemplate.query(sql, new DeploymentRowMapper(), userId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DeploymentEntity> listDeploymentsByRepoId(UUID repoId) {
         String sql = "SELECT * FROM deployments WHERE repo_id = ?";
         return jdbcTemplate.query(sql, new DeploymentRowMapper(), repoId);
@@ -84,6 +91,7 @@ public class PostgresDeploymentRepository implements DeploymentRepository {
     }
 
     @Override
+    @Transactional()
     public DeploymentEntity updateDeployment(DeploymentEntity deploymentEntity) {
         String sql = "UPDATE deployments SET user_id = ?, repo_id = ?, ec2_instance_id = ?, asg_name = ?, elb_name = ?, security_group_id = ?, ec2_public_ip = ?, elb_public_ip = ?, status = ? WHERE deployment_id = ?";
         jdbcTemplate.update(sql,

@@ -31,7 +31,14 @@ public class AWSDeployService {
                 .build();
     }
 
-    public List<String> deployRepo(String name, String clone_url, String ssh_url, String port, List<String> dependencies) {
+    public List<String> deployRepo(
+            String name,
+            String clone_url,
+            String ssh_url,
+            String port,
+            List<String> dependencies,
+            Map<String, String> environments
+    ) {
         System.out.println(dependencies);
         // then we create a dependencies HashMap full of bash scripts for installation
         Map<String, List<String>> dependencyMap = new HashMap<>();
@@ -56,16 +63,28 @@ public class AWSDeployService {
 //        userDataBuilder.append("sudo apt-get update; sudo apt-get install -y java-17-amazon-corretto-jdk\n");
 
         // Iterate over the provided dependencies and append corresponding installation commands
-        System.out.println("Running");
         for (String dep : dependencies) {
             if (dependencyMap.containsKey(dep.toLowerCase())) {
-                System.out.println(dep.toLowerCase());
                 for (String command : dependencyMap.get(dep)) {
                     userDataBuilder.append(command).append("\n");
-                    System.out.println(command + "\n");
+
                 }
             }
         }
+
+        for (Map.Entry<String, String> envVar : environments.entrySet()) {
+            String key = envVar.getKey();
+            String value = envVar.getValue();
+//            userDataBuilder.append("echo '").append(key).append("=").append(value).append("' | sudo tee -a /etc/environment\n");
+//            userDataBuilder.append("export ").append(key).append("=").append(value).append(" && ");
+            userDataBuilder.append("echo export ").append(key).append("=").append(value).append(" >> ").append("~/.bashrc").append("\n");
+            userDataBuilder.append("export ").append(key).append("=").append(value).append("\n");
+        }
+//        userDataBuilder.append("source /etc/environment\n");
+//        userDataBuilder.append("cat /etc/environment\n");
+
+
+        userDataBuilder.append("source ~/.bashrc\n");
 
         userDataBuilder.append("sudo apt-get install -y git\n");
         userDataBuilder.append("git clone ").append(clone_url).append("\n");
@@ -75,6 +94,7 @@ public class AWSDeployService {
         userDataBuilder.append("./run_script.sh\n");
 
         String userData = userDataBuilder.toString();
+        System.out.println(userData);
 
 //        Ubuntu Server 22.04 LTS (HVM), SSD Volume Type
 //        ami-04e601abe3e1a910f (64-bit (x86)) / ami-0329d3839379bfd15 (64-bit (Arm))

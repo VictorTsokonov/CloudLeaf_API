@@ -12,10 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/deploy")
@@ -31,6 +28,7 @@ public class AWSDeploy {
         public String ssh_url;
         public String port;
         public List<String> dependencies;
+        public Map<String, String> environments;
 
     }
 
@@ -55,9 +53,13 @@ public class AWSDeploy {
         String ssh_url = deployRequest.ssh_url;
         String port = deployRequest.port;
         List<String> dependencies = deployRequest.dependencies;
+        System.out.println(deployRequest.environments);
+        Map<String, String> environments = deployRequest.environments;
+
 
         // Use RepoService to get the repo details
         Optional<RepoEntity> repoEntityOpt = repoService.getRepoByName(full_name);
+
 
         if (repoEntityOpt.isEmpty()) {
             throw new IllegalArgumentException("No repository found with name: " + full_name);
@@ -65,6 +67,7 @@ public class AWSDeploy {
 
         RepoEntity repoEntity = repoEntityOpt.get();
         UUID repoId = repoEntity.repoId();
+        repoService.updateRepoStatusByRepoName(full_name, "Deploying...");
 
         // Check if there are any deployments for this repo
         List<DeploymentEntity> existingDeployments = deploymentService.listDeploymentsByRepoId(repoId);
@@ -72,7 +75,7 @@ public class AWSDeploy {
         List<String> ec2Details = new ArrayList<>();
         if (existingDeployments.isEmpty()) { // existingDeployments.size() == 0
             // If there are no existing deployments, deploy the repository to EC2 instance
-            ec2Details = ec2Service.deployRepo(name, clone_url, ssh_url, port, dependencies);
+            ec2Details = ec2Service.deployRepo(name, clone_url, ssh_url, port, dependencies, environments);
 
             UUID userId = repoEntity.userId();
 

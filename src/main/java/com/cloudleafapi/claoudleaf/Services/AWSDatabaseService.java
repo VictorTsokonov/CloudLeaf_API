@@ -5,10 +5,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.AmazonRDSClient;
-import com.amazonaws.services.rds.model.CreateDBInstanceRequest;
-import com.amazonaws.services.rds.model.DBInstance;
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
+import com.amazonaws.services.rds.model.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,7 +58,7 @@ public class AWSDatabaseService {
         };
 
         CreateDBInstanceRequest request = new CreateDBInstanceRequest()
-                .withDBInstanceIdentifier(databaseName)
+                .withDBInstanceIdentifier(githubName + databaseName)
                 .withDBName(databaseName)
                 .withDBInstanceClass("db.m5.large")
                 .withEngine(engine)
@@ -81,7 +78,9 @@ public class AWSDatabaseService {
         rdsClient.createDBInstance(request);
 
         DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest()
-                .withDBInstanceIdentifier(databaseName);
+                .withDBInstanceIdentifier(githubName + databaseName);
+
+        System.out.println("Before while loop");
 
         boolean isAvailable = false;
         while (!isAvailable) {
@@ -96,7 +95,7 @@ public class AWSDatabaseService {
             System.out.println("DB Instance Status: " + status); // Debugging line
             isAvailable = "available".equalsIgnoreCase(status);
         }
-
+        System.out.println("After while loop");
 
         DescribeDBInstancesResult describeDBInstancesResult = rdsClient.describeDBInstances(describeDBInstancesRequest);
         DBInstance dbInstance = describeDBInstancesResult.getDBInstances().get(0);
@@ -120,5 +119,19 @@ public class AWSDatabaseService {
         );
 
         return result;
+    }
+
+
+    public String deleteDatabase(String githubName, String databaseName) {
+        String dbInstanceIdentifier = githubName + databaseName;
+        System.out.println("Deleting " + githubName + "/" + databaseName);
+
+        DeleteDBInstanceRequest request = new DeleteDBInstanceRequest()
+                .withDBInstanceIdentifier(dbInstanceIdentifier)
+                .withSkipFinalSnapshot(true); // Decide if you want to skip or take a final snapshot
+
+        rdsClient.deleteDBInstance(request);
+        ssmService.deleteParams(githubName, databaseName);
+        return "Database deleted successfully";
     }
 }
