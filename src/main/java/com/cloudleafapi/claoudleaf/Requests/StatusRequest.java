@@ -1,21 +1,24 @@
 package com.cloudleafapi.claoudleaf.Requests;
 
 public class StatusRequest {
-    private final String ipAddressAndPort;
-    private final String repoName;
 
-    public StatusRequest(String repoName, String ipAddressAndPort) {
-        this.repoName = repoName;
-        this.ipAddressAndPort = ipAddressAndPort;
-    }
+	private final String ipAddressAndPort;
 
-    public String getIpAddressAndPort() {
-        return ipAddressAndPort;
-    }
+	private final String repoName;
 
-    public String getRepoName() {
-        return repoName;
-    }
+	public StatusRequest(String repoName, String ipAddressAndPort) {
+		this.repoName = repoName;
+		this.ipAddressAndPort = ipAddressAndPort;
+	}
 
-    // getters and setters
+	public String getIpAddressAndPort() {
+		return ipAddressAndPort;
+	}
+
+	public String getRepoName() {
+		return repoName;
+	}
+
+	// getters and setters
+
 }

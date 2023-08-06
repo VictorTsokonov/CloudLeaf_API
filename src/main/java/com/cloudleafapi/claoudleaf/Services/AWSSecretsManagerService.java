@@ -1,6 +1,5 @@
 package com.cloudleafapi.claoudleaf.Services;
 
-
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
@@ -19,73 +18,64 @@ import java.util.stream.Collectors;
 @Service
 public class AWSSecretsManagerService {
 
-    @Value("${aws.accessKeyId}")
-    private String accessKey;
+	@Value("${aws.accessKeyId}")
+	private String accessKey;
 
-    @Value("${aws.secretKey}")
-    private String secretKey;
+	@Value("${aws.secretKey}")
+	private String secretKey;
 
-    private AWSSimpleSystemsManagement ssmClient;
-    private final Gson gson = new Gson();
+	private AWSSimpleSystemsManagement ssmClient;
 
-    @PostConstruct
-    public void initializeClient() {
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-        ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
-                .withRegion(Regions.EU_CENTRAL_1)
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                .build();
-    }
+	private final Gson gson = new Gson();
 
-    public void createParams(String githubName, String databaseName, String connectionUrl, String username, String port) {
-        System.out.println("In create params");
-        String paramName = "/" + githubName + "/" + databaseName;
-        Map<String, String> paramsMap = Map.of(
-                "connectionUrl", connectionUrl,
-                "databaseName", databaseName,
-                "username", username,
-                "port", port
-        );
-        String paramValue = gson.toJson(paramsMap);
+	@PostConstruct
+	public void initializeClient() {
+		BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey,
+				secretKey);
+		ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
+				.withRegion(Regions.EU_CENTRAL_1)
+				.withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+				.build();
+	}
 
-        PutParameterRequest request = new PutParameterRequest()
-                .withName(paramName)
-                .withValue(paramValue)
-                .withType("String");
+	public void createParams(String githubName, String databaseName, String connectionUrl,
+			String username, String port) {
+		System.out.println("In create params");
+		String paramName = "/" + githubName + "/" + databaseName;
+		Map<String, String> paramsMap = Map.of("connectionUrl", connectionUrl,
+				"databaseName", databaseName, "username", username, "port", port);
+		String paramValue = gson.toJson(paramsMap);
 
-        System.out.println(paramName + paramValue);
+		PutParameterRequest request = new PutParameterRequest().withName(paramName)
+				.withValue(paramValue).withType("String");
 
-        ssmClient.putParameter(request);
-    }
+		System.out.println(paramName + paramValue);
 
-    public void deleteParams(String githubName, String databaseName) {
-        System.out.println("In delete params");
-        String paramName = "/" + githubName + "/" + databaseName;
+		ssmClient.putParameter(request);
+	}
 
-        DeleteParameterRequest request = new DeleteParameterRequest()
-                .withName(paramName);
+	public void deleteParams(String githubName, String databaseName) {
+		System.out.println("In delete params");
+		String paramName = "/" + githubName + "/" + databaseName;
 
-        System.out.println("Deleting parameter: " + paramName);
+		DeleteParameterRequest request = new DeleteParameterRequest().withName(paramName);
 
-        ssmClient.deleteParameter(request);
-    }
+		System.out.println("Deleting parameter: " + paramName);
 
+		ssmClient.deleteParameter(request);
+	}
 
-    public List<Object> getParametersByGithubName(String githubName) {
-        String path = "/" + githubName + "/";
+	public List<Object> getParametersByGithubName(String githubName) {
+		String path = "/" + githubName + "/";
 
-        GetParametersByPathRequest request = new GetParametersByPathRequest()
-                .withPath(path)
-                .withRecursive(true)
-                .withWithDecryption(true);
+		GetParametersByPathRequest request = new GetParametersByPathRequest()
+				.withPath(path).withRecursive(true).withWithDecryption(true);
 
-        GetParametersByPathResult result = ssmClient.getParametersByPath(request);
+		GetParametersByPathResult result = ssmClient.getParametersByPath(request);
 
-        return result.getParameters().stream()
-                .map(Parameter::getValue)
-                .map(jsonString -> new Gson().fromJson(jsonString, Object.class))
-                .collect(Collectors.toList());
-    }
-
+		return result.getParameters().stream().map(Parameter::getValue)
+				.map(jsonString -> new Gson().fromJson(jsonString, Object.class))
+				.collect(Collectors.toList());
+	}
 
 }

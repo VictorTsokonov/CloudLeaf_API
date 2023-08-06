@@ -12,44 +12,45 @@ import java.util.UUID;
 @Service
 public class DeploymentService {
 
-    private final DeploymentRepository deploymentRepository;
+	private final DeploymentRepository deploymentRepository;
 
-    @Autowired
-    public DeploymentService(DeploymentRepository deploymentRepository) {
-        this.deploymentRepository = deploymentRepository;
-    }
+	@Autowired
+	public DeploymentService(DeploymentRepository deploymentRepository) {
+		this.deploymentRepository = deploymentRepository;
+	}
 
-    public DeploymentEntity createDeployment(String userID, String repoID, String ec2InstanceId, String ec2PublicIp) {
-        return deploymentRepository.createDeployment(userID, repoID, ec2InstanceId, ec2PublicIp);
-    }
+	public DeploymentEntity createDeployment(String userID, String repoID,
+			String ec2InstanceId, String ec2PublicIp) {
+		return deploymentRepository.createDeployment(userID, repoID, ec2InstanceId,
+				ec2PublicIp);
+	}
 
-    public Optional<DeploymentEntity> getDeployment(UUID deploymentId) {
-        return deploymentRepository.getDeployment(deploymentId);
-    }
+	public Optional<DeploymentEntity> getDeployment(UUID deploymentId) {
+		return deploymentRepository.getDeployment(deploymentId);
+	}
 
-    public Optional<DeploymentEntity> getDeploymentByInstanceId(String instanceId) {
-        return deploymentRepository.getDeploymentByInstanceId(instanceId);
-    }
+	public Optional<DeploymentEntity> getDeploymentByInstanceId(String instanceId) {
+		return deploymentRepository.getDeploymentByInstanceId(instanceId);
+	}
 
-    public Optional<DeploymentEntity> getDeploymentByInstanceIp(String instanceIp) {
-        return deploymentRepository.getDeploymentByInstanceIp(instanceIp);
-    }
+	public Optional<DeploymentEntity> getDeploymentByInstanceIp(String instanceIp) {
+		return deploymentRepository.getDeploymentByInstanceIp(instanceIp);
+	}
 
-    public List<DeploymentEntity> listDeploymentsByUserId(UUID userId) {
-        return deploymentRepository.listDeploymentsByUserId(userId);
-    }
+	public List<DeploymentEntity> listDeploymentsByUserId(UUID userId) {
+		return deploymentRepository.listDeploymentsByUserId(userId);
+	}
 
-    public List<DeploymentEntity> listDeploymentsByRepoId(UUID repoId) {
-        return deploymentRepository.listDeploymentsByRepoId(repoId);
-    }
+	public List<DeploymentEntity> listDeploymentsByRepoId(UUID repoId) {
+		return deploymentRepository.listDeploymentsByRepoId(repoId);
+	}
 
-    public void deleteDeployment(UUID deploymentId) {
-        deploymentRepository.deleteDeployment(deploymentId);
-    }
+	public void deleteDeployment(UUID deploymentId) {
+		deploymentRepository.deleteDeployment(deploymentId);
+	}
 
-    public DeploymentEntity updateDeployment(DeploymentEntity deploymentEntity) {
-        return deploymentRepository.updateDeployment(deploymentEntity);
-    }
-
+	public DeploymentEntity updateDeployment(DeploymentEntity deploymentEntity) {
+		return deploymentRepository.updateDeployment(deploymentEntity);
+	}
 
 }

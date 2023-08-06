@@ -7,19 +7,19 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository {
-    UserEntity createUser(String github_username, String github_access_token);
 
-    Optional<UserEntity> getUser(UUID user_id);
+	UserEntity createUser(String github_username, String github_access_token);
 
-    Optional<UserEntity> findUserByGithubUsername(String username);
+	Optional<UserEntity> getUser(UUID user_id);
 
-    List<UserEntity> listUsers();
+	Optional<UserEntity> findUserByGithubUsername(String username);
 
-    void deleteUser(UUID userId);
+	List<UserEntity> listUsers();
 
-    UserEntity updateUser(UserEntity userEntity);
+	void deleteUser(UUID userId);
 
-    Optional<UserEntity> findUserByGithubAccessToken(String accessToken);
+	UserEntity updateUser(UserEntity userEntity);
 
+	Optional<UserEntity> findUserByGithubAccessToken(String accessToken);
 
 }

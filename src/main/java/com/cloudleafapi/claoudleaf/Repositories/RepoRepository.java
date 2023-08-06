@@ -7,25 +7,26 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface RepoRepository {
-    RepoEntity createRepo(String userID, String repoName, String cloneUrl, String sshUrl, String status);
 
-    Optional<RepoEntity> getRepo(UUID repoID);
+	RepoEntity createRepo(String userID, String repoName, String cloneUrl, String sshUrl,
+			String status);
 
-    List<RepoEntity> listRepoByUserId(UUID userID);
+	Optional<RepoEntity> getRepo(UUID repoID);
 
-    void deleteRepo(UUID repoId);
+	List<RepoEntity> listRepoByUserId(UUID userID);
 
-    RepoEntity updateRepo(RepoEntity repoEntity);
+	void deleteRepo(UUID repoId);
 
-    Optional<RepoEntity> findRepoByUserIdAndRepoName(String userId, String repoName);
+	RepoEntity updateRepo(RepoEntity repoEntity);
 
-    Optional<RepoEntity> getRepoByName(String repoName);
+	Optional<RepoEntity> findRepoByUserIdAndRepoName(String userId, String repoName);
 
-    List<RepoEntity> listReposByUserName(String userName);
+	Optional<RepoEntity> getRepoByName(String repoName);
 
-    void updateRepoStatusByRepoName(String repoName, String status);
+	List<RepoEntity> listReposByUserName(String userName);
 
-    void updateRepoIpAddressByRepoName(String repoName, String ipAddress);
+	void updateRepoStatusByRepoName(String repoName, String status);
+
+	void updateRepoIpAddressByRepoName(String repoName, String ipAddress);
+
 }
-
-

@@ -14,34 +14,34 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Service
 public class AWSDatabaseService {
 
-    @Value("${aws.accessKeyId}")
-    private String accessKey;
+	@Value("${aws.accessKeyId}")
+	private String accessKey;
 
-    @Value("${aws.secretKey}")
-    private String secretKey;
+	@Value("${aws.secretKey}")
+	private String secretKey;
 
-    private AmazonRDS rdsClient;
-    private final AWSSecretsManagerService ssmService;
+	private AmazonRDS rdsClient;
 
-    @Autowired
-    public AWSDatabaseService(AWSSecretsManagerService ssmService) {
-        this.ssmService = ssmService;
-    }
+	private final AWSSecretsManagerService ssmService;
 
-    @PostConstruct
-    public void initialize() {
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-        this.rdsClient = AmazonRDSClient.builder()
-                .withRegion(Regions.EU_CENTRAL_1)
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                .build();
-    }
+	@Autowired
+	public AWSDatabaseService(AWSSecretsManagerService ssmService) {
+		this.ssmService = ssmService;
+	}
 
-    public Map<String, String> createDatabase(String githubName, String databaseName, String username, String password, String type) {
+	@PostConstruct
+	public void initialize() {
+		BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey,
+				secretKey);
+		this.rdsClient = AmazonRDSClient.builder().withRegion(Regions.EU_CENTRAL_1)
+				.withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+				.build();
+	}
+
+	public Map<String, String> createDatabase(String githubName, String databaseName, String username, String password, String type) {
         System.out.println("/" + githubName + "/" + databaseName);
         String engine;
         int port = switch (type) {
@@ -121,17 +121,18 @@ public class AWSDatabaseService {
         return result;
     }
 
+	public String deleteDatabase(String githubName, String databaseName) {
+		String dbInstanceIdentifier = githubName + databaseName;
+		System.out.println("Deleting " + githubName + "/" + databaseName);
 
-    public String deleteDatabase(String githubName, String databaseName) {
-        String dbInstanceIdentifier = githubName + databaseName;
-        System.out.println("Deleting " + githubName + "/" + databaseName);
+		DeleteDBInstanceRequest request = new DeleteDBInstanceRequest()
+				.withDBInstanceIdentifier(dbInstanceIdentifier)
+				.withSkipFinalSnapshot(true); // Decide if you want to skip or take a
+												// final snapshot
 
-        DeleteDBInstanceRequest request = new DeleteDBInstanceRequest()
-                .withDBInstanceIdentifier(dbInstanceIdentifier)
-                .withSkipFinalSnapshot(true); // Decide if you want to skip or take a final snapshot
+		rdsClient.deleteDBInstance(request);
+		ssmService.deleteParams(githubName, databaseName);
+		return "Database deleted successfully";
+	}
 
-        rdsClient.deleteDBInstance(request);
-        ssmService.deleteParams(githubName, databaseName);
-        return "Database deleted successfully";
-    }
 }

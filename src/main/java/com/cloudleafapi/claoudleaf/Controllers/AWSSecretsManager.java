@@ -13,17 +13,16 @@ import java.util.List;
 @RequestMapping("/api/ssm")
 public class AWSSecretsManager {
 
-    private final AWSSecretsManagerService secretsManagerService;
+	private final AWSSecretsManagerService secretsManagerService;
 
-    @Autowired
-    public AWSSecretsManager(AWSSecretsManagerService secretsManagerService) {
-        this.secretsManagerService = secretsManagerService;
-    }
+	@Autowired
+	public AWSSecretsManager(AWSSecretsManagerService secretsManagerService) {
+		this.secretsManagerService = secretsManagerService;
+	}
 
-    @GetMapping("/parameters")
-    public List<Object> getParameters(@RequestParam String githubName) {
-        return secretsManagerService.getParametersByGithubName(githubName);
-    }
-
+	@GetMapping("/parameters")
+	public List<Object> getParameters(@RequestParam String githubName) {
+		return secretsManagerService.getParametersByGithubName(githubName);
+	}
 
 }

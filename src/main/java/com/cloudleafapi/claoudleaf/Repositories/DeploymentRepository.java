@@ -7,26 +7,28 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface DeploymentRepository {
-    DeploymentEntity createDeployment(String userID, String repoID, String ec2InstanceId, String ec2PublicIp);
 
-    Optional<DeploymentEntity> getDeployment(UUID deploymentId);
+	DeploymentEntity createDeployment(String userID, String repoID, String ec2InstanceId,
+			String ec2PublicIp);
 
-    Optional<DeploymentEntity> getDeploymentByInstanceId(String instanceId);
+	Optional<DeploymentEntity> getDeployment(UUID deploymentId);
 
-    Optional<DeploymentEntity> getDeploymentByInstanceIp(String instanceIp);
+	Optional<DeploymentEntity> getDeploymentByInstanceId(String instanceId);
 
-    List<DeploymentEntity> listDeploymentsByUserId(UUID userId);
+	Optional<DeploymentEntity> getDeploymentByInstanceIp(String instanceIp);
 
-    List<DeploymentEntity> listDeploymentsByRepoId(UUID repoId);
+	List<DeploymentEntity> listDeploymentsByUserId(UUID userId);
 
-    void deleteDeployment(UUID deploymentId);
+	List<DeploymentEntity> listDeploymentsByRepoId(UUID repoId);
 
-    DeploymentEntity updateDeployment(DeploymentEntity deploymentEntity);
+	void deleteDeployment(UUID deploymentId);
+
+	DeploymentEntity updateDeployment(DeploymentEntity deploymentEntity);
+
 }
 
-
-//    UserEntity createUser(String github_username, String github_access_token);
+// UserEntity createUser(String github_username, String github_access_token);
 //
-//    Optional<UserEntity> getUser(UUID user_id);
+// Optional<UserEntity> getUser(UUID user_id);
 //
-//    List<UserEntity> listUsers();
+// List<UserEntity> listUsers();
