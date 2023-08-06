@@ -1,10 +1,8 @@
 package com.cloudleafapi.claoudleaf.Services;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
@@ -14,19 +12,13 @@ import java.util.*;
 @Service
 public class AWSDeployService {
 
-	@Value("${aws.accessKeyId}")
-	private String accessKey;
-
-	@Value("${aws.secretKey}")
-	private String secretKey;
-
 	private Ec2Client ec2;
 
 	@PostConstruct
 	public void init() {
-		this.ec2 = Ec2Client.builder().region(Region.EU_CENTRAL_1)
-				.credentialsProvider(StaticCredentialsProvider
-						.create(AwsBasicCredentials.create(accessKey, secretKey)))
+		this.ec2 = Ec2Client.builder()
+				.region(Region.EU_CENTRAL_1)
+				.credentialsProvider(DefaultCredentialsProvider.create())
 				.build();
 	}
 

@@ -1,14 +1,12 @@
 package com.cloudleafapi.claoudleaf.Services;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.AmazonRDSClient;
 import com.amazonaws.services.rds.model.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -17,29 +15,22 @@ import java.util.Map;
 @Service
 public class AWSDatabaseService {
 
-	@Value("${aws.accessKeyId}")
-	private String accessKey;
+    private AmazonRDS rdsClient;
 
-	@Value("${aws.secretKey}")
-	private String secretKey;
+    private final AWSSecretsManagerService ssmService;
 
-	private AmazonRDS rdsClient;
+    @Autowired
+    public AWSDatabaseService(AWSSecretsManagerService ssmService) {
+        this.ssmService = ssmService;
+    }
 
-	private final AWSSecretsManagerService ssmService;
-
-	@Autowired
-	public AWSDatabaseService(AWSSecretsManagerService ssmService) {
-		this.ssmService = ssmService;
-	}
-
-	@PostConstruct
-	public void initialize() {
-		BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey,
-				secretKey);
-		this.rdsClient = AmazonRDSClient.builder().withRegion(Regions.EU_CENTRAL_1)
-				.withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-				.build();
-	}
+    @PostConstruct
+    public void initialize() {
+        this.rdsClient = AmazonRDSClient.builder()
+                .withRegion(Regions.EU_CENTRAL_1)
+                .withCredentials(new DefaultAWSCredentialsProviderChain())
+                .build();
+    }
 
 	public Map<String, String> createDatabase(String githubName, String databaseName, String username, String password, String type) {
         System.out.println("/" + githubName + "/" + databaseName);
