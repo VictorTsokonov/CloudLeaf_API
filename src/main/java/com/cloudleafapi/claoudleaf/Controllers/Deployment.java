@@ -19,6 +19,13 @@ public class Deployment {
 		this.deploymentService = deploymentService;
 	}
 
+	@GetMapping("/getTest")
+	public String omg(){
+		return "VERY COOL";
+	}
+
+
+
 	@PostMapping
 	public DeploymentEntity createDeployment(
 			@RequestBody DeploymentEntity deploymentEntity) {
