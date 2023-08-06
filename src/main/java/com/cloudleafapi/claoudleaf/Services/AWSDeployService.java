@@ -100,7 +100,7 @@ public class AWSDeployService {
 
 		RunInstancesRequest runRequest = RunInstancesRequest.builder()
 				.imageId("ami-0329d3839379bfd15") // replace with your AMI ID --> Ubuntu
-				.instanceType(InstanceType.T2_MEDIUM).maxCount(1).minCount(1)
+				.instanceType(InstanceType.T4_G_LARGE).maxCount(1).minCount(1)
 				.userData(Base64.getEncoder().encodeToString(userData.getBytes()))
 				.keyName("CloudLeafKey") // replace with your key pair name
 				.securityGroupIds("sg-044b705a44c5f27b4") // replace with your security
